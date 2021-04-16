@@ -1,6 +1,5 @@
 const cheerio = require('cheerio');
 const playwright = require('playwright');
-const fs = require('fs');
 
 const URL = 'https://www.vivareal.com.br/aluguel/minas-gerais/belo-horizonte/bairros/grajau/apartamento_residencial/#ordenar-por=preco-total:DESC&preco-ate=3500&preco-desde=2000&preco-total=sim&tipos=apartamento_residencial,cobertura_residencial';
 
