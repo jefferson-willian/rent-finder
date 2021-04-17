@@ -20,7 +20,6 @@ const myBrowser = browser.newBrowser();
 
 myBrowser.launch()
   .then(() => myBrowser.gotoAndWaitForRequest(URL, /.*property\-detail\.js/))
-  .then(result => myPage.content())
   .then(html => {
     console.log("Total: " + getResults(html).length);
   })
