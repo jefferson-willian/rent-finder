@@ -1,5 +1,5 @@
+const browser = require('./browser.js');
 const cheerio = require('cheerio');
-const playwright = require('playwright');
 
 const URL = 'https://www.vivareal.com.br/aluguel/minas-gerais/belo-horizonte/bairros/grajau/apartamento_residencial/#ordenar-por=preco-total:DESC&preco-ate=3500&preco-desde=2000&preco-total=sim&tipos=apartamento_residencial,cobertura_residencial';
 
@@ -16,23 +16,13 @@ function getResults(html) {
   .toArray();
 }
 
-var myBrowser;
+const myBrowser = browser.newBrowser();
 
-playwright['chromium'].launch()
-  .then(browser => {
-    myBrowser = browser;
-    return browser.newContext();
-  })
-  .then(context => context.newPage())
-  .then(page => {
-    myPage = page;
-    return page;
-  })
-  .then(page => page.goto(URL))
-  .then(result => myPage.waitForRequest(/.*property\-detail\.js/))
+myBrowser.launch()
+  .then(() => myBrowser.gotoAndWaitForRequest(URL, /.*property\-detail\.js/))
   .then(result => myPage.content())
   .then(html => {
     console.log("Total: " + getResults(html).length);
   })
-  .catch(err => console.log(err))
-  .finally(() => myBrowser.close());
+  .then(() => myBrowser.close())
+  .catch(err => console.log(err));
