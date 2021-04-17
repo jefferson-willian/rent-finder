@@ -8,6 +8,6 @@ const vivarealScrapper = scrappers.newVivaRealScrapper(myBrowser);
 
 myBrowser.launch()
   .then(() => vivarealScrapper.extractFrom(URL))
-  .then(result => console.log("Result: " + result))
+  .then(result => console.log("Total results: " + result.length))
   .then(() => myBrowser.close())
   .catch(err => console.log(err));
