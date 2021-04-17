@@ -24,8 +24,13 @@ playwright['chromium'].launch()
     return browser.newContext();
   })
   .then(context => context.newPage())
+  .then(page => {
+    myPage = page;
+    return page;
+  })
   .then(page => page.goto(URL))
-  .then(response => response.text())
+  .then(result => myPage.waitForRequest(/.*property\-detail\.js/))
+  .then(result => myPage.content())
   .then(html => {
     console.log("Total: " + getResults(html).length);
   })
