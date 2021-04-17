@@ -8,7 +8,7 @@ class VivaRealScrapper {
 
   extractFrom(url) {
     return this.browser_.gotoAndWaitForRequest(url, /.*property\-detail\.js/)
-      .then(html => getResults(html));
+      .then(html => this.getResults_(html));
   }
 
   getResults_(html) {
