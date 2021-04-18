@@ -22,7 +22,7 @@ class Browser {
       .then(() => this.page_.content());
   }
 
-  close () {
+  close() {
     return this.browser_.close();
   }
 }

@@ -17,7 +17,16 @@ class Database {
   }
 
   getQueries() {
-    return this.client_.query('SELECT * FROM queries');
+    return this.client_
+      .query('SELECT * FROM queries')
+      .then(res => res.rows);
+  }
+
+  getRents(identifier) {
+    const query = 'SELECT * FROM rents WHERE query_id = $1';
+    return this.client_
+      .query(query, [identifier])
+      .then(res => res.rows);
   }
 
   close() {
@@ -25,6 +34,6 @@ class Database {
   }
 }
 
-exports.newDatabase = function () {
-  return new Database();
+module.exports = {
+  Database
 }
