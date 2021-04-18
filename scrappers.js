@@ -22,12 +22,13 @@ class VivaRealScrapper {
     var keepGettingResults = true;
 
     return $('.results-list').children().filter((i, node) => {
-      // Skip ads.
-      if (node.name == 'aside') {
+      const dataType = node.attribs['data-type'];
+      console.log(dataType);
+      if (dataType == null || (dataType != 'property' && dataType != 'neraby')) {
         return false;
       }
       keepGettingResults = keepGettingResults
-        ? node.attribs['data-type'] == 'property' : false;
+        ? dataType != 'nearby' : false;
       return keepGettingResults;
     })
     .map((i, node) => {
