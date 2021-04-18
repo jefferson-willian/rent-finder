@@ -11,7 +11,9 @@ const db = database.newDatabase();
 db.connect()
   .then(() => db.getQueries())
   .then(res => {
-    console.log(res);
+    res.forEach((row, i) => {
+      console.log(row.href);
+    });
     return null;
   })
   .then(() => db.close())
