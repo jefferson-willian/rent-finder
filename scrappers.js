@@ -1,5 +1,10 @@
 const cheerio = require('cheerio');
+const md5 = require('md5');
 
+function getMd5(str) {
+  const md5NoDash = md5(str);
+  return md5NoDash.substring(0, 8) + "-" + md5NoDash.substring(8, 12) + "-" + md5NoDash.substring(12, 16) + "-" + md5NoDash.substring(16, 20) + "-" + md5NoDash.substring(20, 32);
+}
 
 class VivaRealScrapper {
   constructor(browser) {
@@ -20,11 +25,17 @@ class VivaRealScrapper {
         ? node.attribs['data-type'] == 'property' : false;
       return keepGettingResults;
     })
-    .map((i, node) => $(node).find('.property-card__content-link').attr('href'))
+    .map((i, node) => {
+      const href = $(node).find('.property-card__content-link').attr('href');
+      return {
+        'href': href,
+        'id': getMd5(href)
+      };
+    })
     .toArray();
   }
 }
 
-exports.newVivaRealScrapper = function (browser) {
-  return new VivaRealScrapper(browser);
+module.exports = {
+  VivaRealScrapper
 }

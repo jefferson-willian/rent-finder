@@ -27,6 +27,6 @@ class Browser {
   }
 }
 
-exports.newBrowser = function () {
-  return new Browser();
+module.exports = {
+  Browser
 }
