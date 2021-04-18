@@ -22,6 +22,10 @@ class VivaRealScrapper {
     var keepGettingResults = true;
 
     return $('.results-list').children().filter((i, node) => {
+      // Skip ads.
+      if (node.name == 'aside') {
+        return false;
+      }
       keepGettingResults = keepGettingResults
         ? node.attribs['data-type'] == 'property' : false;
       return keepGettingResults;
