@@ -8,6 +8,7 @@ function getMd5(str) {
 
 class VivaRealScrapper {
   constructor(browser) {
+    this.domain_ = 'https://www.vivareal.com.br';
     this.browser_ = browser;
   }
 
@@ -26,7 +27,7 @@ class VivaRealScrapper {
       return keepGettingResults;
     })
     .map((i, node) => {
-      const href = $(node).find('.property-card__content-link').attr('href');
+      const href = this.domain_ + $(node).find('.property-card__content-link').attr('href');
       return {
         'href': href,
         'id': getMd5(href)

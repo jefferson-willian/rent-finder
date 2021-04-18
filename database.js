@@ -30,13 +30,14 @@ class Database {
   }
 
   addNewRents(rents, queryId) {
-    const query = 'INSERT INTO rents (id, href, query_id, last_update) VALUES ' +
-      rents.map((rent, i) => '($' + (i * 4 + 1) + ', $' + (i * 4 + 2) + ', $' + (i * 4 + 3) + ', $' + (i * 4 + 4) + ')').join(',');
+    const query = 'INSERT INTO rents (id, href, query_id, creation_date, last_update) VALUES ' +
+      rents.map((rent, i) => '($' + (i * 5 + 1) + ', $' + (i * 5 + 2) + ', $' + (i * 5 + 3) + ', $' + (i * 5 + 4) + ', $' + (i * 5 + 5) + ')').join(',');
 
     const values = rents.map(rent => [
       rent.id,
       rent.href,
       queryId,
+      new Date().toISOString(),
       new Date().toISOString()
     ]);
 
