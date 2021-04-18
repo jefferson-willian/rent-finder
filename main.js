@@ -10,6 +10,10 @@ const db = database.newDatabase();
 
 db.connect()
   .then(() => db.getQueries())
+  .then(res => {
+    console.log(res);
+    return null;
+  })
   .then(() => db.close())
   .catch(err => console.log(err));
 

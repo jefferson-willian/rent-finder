@@ -17,15 +17,7 @@ class Database {
   }
 
   getQueries() {
-    return this.client_.query('SELECT * FROM queries;', (err, res) => {
-      if (err) {
-        console.log(err);
-      } else {
-        for (var row of res.rows) {
-          console.log(JSON.stringify(row));
-        }
-      }
-    });
+    return this.client_.query('SELECT * FROM queries');
   }
 
   close() {
