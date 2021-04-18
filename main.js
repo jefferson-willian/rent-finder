@@ -15,6 +15,7 @@ db.connect()
     return null;
   })
   .then(() => db.close())
+  .then(() => console.log("Closed!"))
   .catch(err => console.log(err));
 
 /*
