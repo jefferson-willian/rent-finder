@@ -23,7 +23,7 @@ class VivaRealScrapper {
 
     return $('.results-list').children().filter((i, node) => {
       const dataType = node.attribs['data-type'];
-      if (dataType == null || (dataType != 'property' && dataType != 'neraby')) {
+      if (dataType == null || (dataType != 'property' && dataType != 'nearby')) {
         return false;
       }
       keepGettingResults = keepGettingResults
