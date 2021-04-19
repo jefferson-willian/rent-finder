@@ -13,7 +13,7 @@ class VivaRealScrapper {
   }
 
   extractFrom(url) {
-    return this.browser_.gotoAndWaitForRequest(url, /.*property\-detail\.js/)
+    return this.browser_.gotoAndWaitForRequest(url, /.*latest\.json/)
       .then(html => this.getResults_(html));
   }
 
