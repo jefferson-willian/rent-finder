@@ -1,10 +1,12 @@
 const { Browser } = require('./browser.js');
 const { Database } = require('./database.js');
+const { EmailSender } = require('./email-sender.js');
 const { VivaRealScrapper } = require('./scrappers.js');
 
 const browser = new Browser();
 const scrapper = new VivaRealScrapper(browser);
 const db = new Database();
+const email = new EmailSender();
 
 function processQuery(query) {
   const rentsDbPromise = db.getRents(query.id);
@@ -69,14 +71,21 @@ initialize()
   // Process each query
   .then(rows => Promise.all(rows.map((row, i) => processQuery(row))))
   .then(results => {
+    var emailResults = [];
     results.forEach((result) => {
       if (result != undefined && result != null && result.newRents.length > 0) {
         console.log("Found " + result.newRents.length + " new rents for " + result.queryName);
         if (result.skipEmail) {
           console.log("Skip sending e-mail updates.");
+        } else {
+          emailResults.push(result);
         }
       }
     });
+
+    console.log("Sending " + emailResults.length + " over e-mail.");
+
+    return emailResults.length > 0 ? email.sendEmailResults(emailResults) : Promise.resolve();
   })
   .catch(err => console.log(err))
   .finally(() => close());
