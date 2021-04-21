@@ -52,7 +52,7 @@ function processQuery(query) {
         'newRents': newRentsHref
       };
     })
-    .catch(err => console.log(err));
+    .catch(err => console.log("Failed to fetch '" + query.name + "'"));
 }
 
 function initialize() {
