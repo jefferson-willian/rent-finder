@@ -1,4 +1,10 @@
 const pg = require('pg');
+const md5 = require('md5');
+
+function getMd5(str) {
+  const md5NoDash = md5(str);
+  return md5NoDash.substring(0, 8) + "-" + md5NoDash.substring(8, 12) + "-" + md5NoDash.substring(12, 16) + "-" + md5NoDash.substring(16, 20) + "-" + md5NoDash.substring(20, 32);
+}
 
 class Database {
   constructor() {
@@ -20,6 +26,30 @@ class Database {
     return this.client_
       .query('SELECT * FROM queries')
       .then(res => res.rows);
+  }
+
+  addQueries(entries) {
+    const query = 'INSERT INTO queries (id, href, name, creation_date) VALUES ' +
+      entries.map((value, i) => '($' + (i * 4 + 1)
+                             + ', $' + (i * 4 + 2)
+                             + ', $' + (i * 4 + 3)
+                             + ', $' + (i * 4 + 4) + ')').join(',');
+
+    const values = entries.map(entry => [
+      getMd5(entry.href),
+      entry.href,
+      entry.name,
+      new Date().toISOString()
+    ]);
+
+    return this.client_
+      .query(query, [].concat.apply([], values));
+  }
+
+  deleteQueries(ids) {
+    const query = 'DELETE FROM queries WHERE id IN (' + ids.map((val, i) => '$' + (i + 1)).join(',') + ')';
+
+    return this.client_.query(query, ids);
   }
 
   getRents(identifier) {
