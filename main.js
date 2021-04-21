@@ -71,8 +71,8 @@ initialize()
   .then(results => {
     results.forEach((result) => {
       if (result.newRents.length > 0) {
-        console.log("Found " + result.newRents.length + " new rents for " + result.newRents.name);
-        if (result.newRents.skipEmail) {
+        console.log("Found " + result.newRents.length + " new rents for " + result.queryName);
+        if (result.skipEmail) {
           console.log("Skip sending e-mail updates.");
         }
       }
