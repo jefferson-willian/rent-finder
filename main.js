@@ -13,6 +13,9 @@ function processQuery(query) {
   // Skip sending email with results if the query is running for the first time.
   const skipEmail = query.last_update == null;
 
+  // Hold the links for every new rent found.
+  var newRentsHref = [];
+
   return Promise.all([rentsDbPromise, rentsWebPromise])
     .then(results => {
       // Get current rent IDs already in database.
@@ -41,11 +44,17 @@ function processQuery(query) {
           ? Promise.resolve()
           : db.addNewRents(result.newRents, query.id);
 
-      result.newRents.forEach(rent => console.log("Adding: " + rent.href));
+      newRentsHref = result.newRents.map(rent => rent.href);
 
       return Promise.all([updateStateCurrentRents, addNewRents]);
     })
     .then(() => db.refreshQueryState(query.id))
+    .then(() => {
+      return {
+        'queryName': query.name,
+        'newRents': newRentsHref
+      };
+    })
     .catch(err => console.log(err));
 }
 
@@ -62,5 +71,6 @@ initialize()
   .then(() => db.getQueries())
   // Process each query
   .then(rows => Promise.all(rows.map((row, i) => processQuery(row))))
+  .then(result => console.log(result))
   .catch(err => console.log(err))
   .finally(() => close());
