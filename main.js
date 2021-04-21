@@ -31,10 +31,6 @@ function processQuery(query) {
             .filter(rent => !currentRentIds.includes(rent.id))
       };
     })
-    .then(result => skipEmail
-          ? Promise.resolve(result)
-          // TODO: send email.
-          : Promise.resolve().then(() => result))
     .then(result => {
       const updateStateCurrentRents = result.existentRentIdsRefresh.length == 0
           ? Promise.resolve()
@@ -52,6 +48,7 @@ function processQuery(query) {
     .then(() => {
       return {
         'queryName': query.name,
+        'skipEmail': skipEmail,
         'newRents': newRentsHref
       };
     })
@@ -71,6 +68,15 @@ initialize()
   .then(() => db.getQueries())
   // Process each query
   .then(rows => Promise.all(rows.map((row, i) => processQuery(row))))
-  .then(result => console.log(result))
+  .then(result => {
+    result.each(result => {
+      if (result.newRents.length > 0) {
+        console.log("Found " + result.newRents.length + " new rents for " + result.newRents.name);
+        if (result.newRents.skipEmail) {
+          console.log("Skip sending e-mail updates.");
+        }
+      }
+    });
+  })
   .catch(err => console.log(err))
   .finally(() => close());
