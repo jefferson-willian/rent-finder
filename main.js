@@ -68,8 +68,8 @@ initialize()
   .then(() => db.getQueries())
   // Process each query
   .then(rows => Promise.all(rows.map((row, i) => processQuery(row))))
-  .then(result => {
-    result.forEach(result => {
+  .then(results => {
+    results.forEach(result => {
       if (result.newRents.length > 0) {
         console.log("Found " + result.newRents.length + " new rents for " + result.newRents.name);
         if (result.newRents.skipEmail) {
