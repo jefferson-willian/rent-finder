@@ -70,7 +70,7 @@ initialize()
   .then(rows => Promise.all(rows.map((row, i) => processQuery(row))))
   .then(results => {
     results.forEach((result) => {
-      if (result.newRents.length > 0) {
+      if (result != undefined && result != null && result.newRents.length > 0) {
         console.log("Found " + result.newRents.length + " new rents for " + result.queryName);
         if (result.skipEmail) {
           console.log("Skip sending e-mail updates.");
