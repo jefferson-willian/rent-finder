@@ -3,6 +3,8 @@ const { Database } = require('./database.js');
 const { EmailSender } = require('./email-sender.js');
 const { VivaRealScrapper } = require('./scrappers.js');
 
+const PromisePool = require('es6-promise-pool')
+
 const browser = new Browser();
 const scrapper = new VivaRealScrapper(browser);
 const db = new Database();
@@ -69,7 +71,14 @@ initialize()
   // Get every rent query that should be processed.
   .then(() => db.getQueries())
   // Process each query
-  .then(rows => Promise.all(rows.map((row, i) => processQuery(row))))
+  .then(rows => {
+    const generatePromises = function * () {
+      for (let i = 0; i < rows.length; i++) {
+        yield processQuery(rows[i])
+      }
+    }
+    return new PromisePool(generatePromises(), 3).start();
+  })
   .then(results => {
     var emailResults = [];
     results.forEach((result) => {
