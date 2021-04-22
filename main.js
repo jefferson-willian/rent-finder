@@ -67,6 +67,8 @@ function close() {
   return Promise.all([db.close(), browser.close()]);
 }
 
+var results_ = [];
+
 initialize()
   // Get every rent query that should be processed.
   .then(() => db.getQueries())
@@ -74,14 +76,14 @@ initialize()
   .then(rows => {
     const generatePromises = function * () {
       for (let i = 0; i < rows.length; i++) {
-        yield processQuery(rows[i])
+        yield processQuery2(rows[i]).then(result => results_.push(result));
       }
     }
     return new PromisePool(generatePromises(), 3).start();
   })
-  .then(results => {
+  .then(() => {
     var emailResults = [];
-    results.forEach((result) => {
+    results_.forEach((result) => {
       if (result != undefined && result != null && result.newRents.length > 0) {
         console.log("Found " + result.newRents.length + " new rents for " + result.queryName);
         if (result.skipEmail) {
