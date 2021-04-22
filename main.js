@@ -76,7 +76,7 @@ initialize()
   .then(rows => {
     const generatePromises = function * () {
       for (let i = 0; i < rows.length; i++) {
-        yield processQuery2(rows[i]).then(result => results_.push(result));
+        yield processQuery(rows[i]).then(result => results_.push(result));
       }
     }
     return new PromisePool(generatePromises(), 3).start();
