@@ -22,7 +22,10 @@ class Browser {
       .then(() => page.content())
       .then(content => Promise.all([Promise.resolve(content), page.close()]))
       .then(result => returnResult = result[0])
-      .catch(err => page.close())
+      .catch(err => {
+        console.log("Browser: " + err);
+        return page.close();
+      })
       .then(() => {
         if (returnResult == null) {
           throw new Error();
