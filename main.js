@@ -79,7 +79,7 @@ initialize()
         yield processQuery(rows[i]).then(result => results_.push(result));
       }
     }
-    return new PromisePool(generatePromises(), 3).start();
+    return new PromisePool(generatePromises(), 1).start();
   })
   .then(() => {
     var emailResults = [];
