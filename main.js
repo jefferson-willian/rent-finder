@@ -68,6 +68,7 @@ function close() {
 }
 
 var results_ = [];
+var startTimestamp = new Date().getTime();
 
 initialize()
   // Get every rent query that should be processed.
@@ -99,4 +100,6 @@ initialize()
     return emailResults.length > 0 ? email.sendEmailResults(emailResults) : Promise.resolve();
   })
   .catch(err => console.log(err))
-  .finally(() => close());
+  .finally(() => close().then(() => {
+    console.log("Execution time: " + (new Date().getTime() - startTimestamp) / 1000. + " seconds");
+  }));
