@@ -24,12 +24,12 @@ class Database {
 
   getQueries() {
     return this.client_
-      .query('SELECT * FROM queries')
+      .query('SELECT * FROM searches')
       .then(res => res.rows);
   }
 
   addQueries(entries) {
-    const query = 'INSERT INTO queries (id, href, name, creation_date) VALUES ' +
+    const query = 'INSERT INTO searches (id, href, name, creation_date) VALUES ' +
       entries.map((value, i) => '($' + (i * 4 + 1)
                              + ', $' + (i * 4 + 2)
                              + ', $' + (i * 4 + 3)
@@ -47,7 +47,7 @@ class Database {
   }
 
   deleteQueries(ids) {
-    const query = 'DELETE FROM queries WHERE id IN (' + ids.map((val, i) => '$' + (i + 1)).join(',') + ')';
+    const query = 'DELETE FROM searches WHERE id IN (' + ids.map((val, i) => '$' + (i + 1)).join(',') + ')';
 
     return this.client_.query(query, ids);
   }
@@ -82,7 +82,7 @@ class Database {
   }
 
   refreshQueryState(id) {
-    const query = 'UPDATE queries SET last_update = $2 WHERE id = $1';
+    const query = 'UPDATE searches SET last_update = $2 WHERE id = $1';
     return this.client_
       .query(query, [id, new Date().toISOString()])
   }
