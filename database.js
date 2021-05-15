@@ -11,6 +11,11 @@ class Database {
     this.client_ = null;
   }
 
+  /**
+   * Establish connection to the database.
+   *
+   * @public
+   **/
   connect() {
     this.client_ = new pg.Client({
       connectionString: process.env.DATABASE_URL,
@@ -22,10 +27,22 @@ class Database {
     return this.client_.connect();
   }
 
+  /**
+   * Returns all searches.
+   *
+   * @public
+   **/
+  getSearches() {
+    return this.select_('searches');
+  }
+
+  /**
+   * Returns all queries.
+   *
+   * @public
+   **/
   getQueries() {
-    return this.client_
-      .query('SELECT * FROM queries')
-      .then(res => res.rows);
+    return this.select_('queries');
   }
 
   addQueries(entries) {
@@ -61,25 +78,19 @@ class Database {
       });
   }
 
-  getSearches() {
-    return this.client_
-      .query('SELECT * FROM searches')
-      .then(res => res.rows);
-  }
-
   deleteQueries(ids) {
-    const query = 'DELETE FROM queries WHERE id IN (' + ids.map((val, i) => '$' + (i + 1)).join(',') + ')';
-
-    return this.client_.query(query, ids)
+    return this.delete_('queries', 'id IN ' + this.createSqlSet_(ids))
       .then(() => this.clearSearches_());
   }
 
   clearSearches_() {
     return this.getQueries()
       .then(results => {
-        const activeSearches = [...new Set(results.map(result => result.search_id))];
-        const query = 'DELETE FROM searches WHERE id NOT IN ' + this.getValuesMap_(/* totalEntries */ 1, activeSearches.length);
-        return this.client_.query(query, activeSearches);
+        const activeSearches = this.uniqueArray_(
+          results.map(result => result.search_id));
+
+        return this.delete_('searches',
+          'id NOT IN ' + this.createSqlSet_(activeSearches));
       });
   }
 
@@ -122,6 +133,33 @@ class Database {
     return this.client_.end();
   }
 
+  select_(tableName, conditional = null) {
+    const query = 'SELECT * FROM ' + tableName
+      + (conditional ? ' WHERE ' + conditional : '');
+
+    return this.assertConnection_()
+      .then(() => this.client_.query(query))
+      .then(res => res.rows);
+  }
+
+  delete_(tableName, conditional) {
+    const query = 'DELETE FROM ' + tableName + ' WHERE ' + conditional;
+    return this.assertConnection_()
+      .then(() => this.client_.query(query));
+  }
+
+  createSqlSet_(values, encloseQuotes = true) {
+    if (encloseQuotes) {
+      return '(' + values.map(value => `'${value}'`).join(',') + ')';
+    } else {
+      return '(' + values.join(',') + ')';
+    }
+  }
+
+  uniqueArray_(array) {
+    return [...new Set(array)];
+  }
+
   getValuesMap_(totalEntries, valuesPerEntry) {
     var entries = [];
     for (var i = 0; i < totalEntries; ++i) {
@@ -132,6 +170,14 @@ class Database {
       entries.push('(' + entry.join(',') + ')');
     }
     return entries.join(',');
+  }
+
+  assertConnection_() {
+    if (this.client_ == null) {
+      return Promise.reject(new Error('Uninitialized database client.'));
+    }
+
+    return Promise.resolve();
   }
 }
 
