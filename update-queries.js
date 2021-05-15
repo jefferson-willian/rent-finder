@@ -39,7 +39,7 @@ function getEntriesFromCsv(filename) {
   return readFile(filename)
     .then(content => csv(content, ['href', 'name']))
     .then(entries => entries.map(entry => {
-      entry['id'] = getMd5(entry.name);
+      entry['id'] = getMd5(entry.href);
       return entry;
     }));
 }

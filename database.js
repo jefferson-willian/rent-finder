@@ -24,32 +24,63 @@ class Database {
 
   getQueries() {
     return this.client_
-      .query('SELECT * FROM searches')
+      .query('SELECT * FROM queries')
       .then(res => res.rows);
   }
 
   addQueries(entries) {
-    const query = 'INSERT INTO searches (id, href, name, creation_date) VALUES ' +
-      entries.map((value, i) => '($' + (i * 4 + 1)
-                             + ', $' + (i * 4 + 2)
-                             + ', $' + (i * 4 + 3)
-                             + ', $' + (i * 4 + 4) + ')').join(',');
+    const query = 'INSERT INTO queries (id, href, search_id, creation_date) VALUES ' +
+      this.getValuesMap_(entries.length, /* valuesPerEntry */ 4);
 
     const values = entries.map(entry => [
-      getMd5(entry.name),
+      getMd5(entry.href),
       entry.href,
-      entry.name,
+      getMd5(entry.name),
       new Date().toISOString()
     ]);
 
+    return this.tryAddSearches_(entries.map(entry => entry.name))
+      .then(() => this.client_.query(query, [].concat.apply([], values)));
+  }
+
+  tryAddSearches_(searches) {
+    return this.getSearches()
+      .then(results => {
+        const currentSearches = results.map(result => result.name);
+        const newSearches = [...new Set(searches)]
+                           .filter(search => !currentSearches.includes(search));
+        // No new search to update.
+        if (newSearches.length == 0) {
+          return;
+        }
+        const query = 'INSERT INTO searches (id, name) VALUES ' +
+          this.getValuesMap_(newSearches.length, /* valuesPerEntry */ 2);
+        return this.client_.query(query, [].concat.apply([],
+          newSearches.map(name => [getMd5(name), name])
+        ));
+      });
+  }
+
+  getSearches() {
     return this.client_
-      .query(query, [].concat.apply([], values));
+      .query('SELECT * FROM searches')
+      .then(res => res.rows);
   }
 
   deleteQueries(ids) {
-    const query = 'DELETE FROM searches WHERE id IN (' + ids.map((val, i) => '$' + (i + 1)).join(',') + ')';
+    const query = 'DELETE FROM queries WHERE id IN (' + ids.map((val, i) => '$' + (i + 1)).join(',') + ')';
 
-    return this.client_.query(query, ids);
+    return this.client_.query(query, ids)
+      .then(() => this.clearSearches_());
+  }
+
+  clearSearches_() {
+    return this.getQueries()
+      .then(results => {
+        const activeSearches = [...new Set(results.map(result => result.search_id))];
+        const query = 'DELETE FROM searches WHERE id NOT IN ' + this.getValuesMap_(/* totalEntries */ 1, activeSearches.length);
+        return this.client_.query(query, activeSearches);
+      });
   }
 
   getRents(identifier) {
@@ -82,13 +113,25 @@ class Database {
   }
 
   refreshQueryState(id) {
-    const query = 'UPDATE searches SET last_update = $2 WHERE id = $1';
+    const query = 'UPDATE queries SET last_update = $2 WHERE id = $1';
     return this.client_
       .query(query, [id, new Date().toISOString()])
   }
 
   close() {
     return this.client_.end();
+  }
+
+  getValuesMap_(totalEntries, valuesPerEntry) {
+    var entries = [];
+    for (var i = 0; i < totalEntries; ++i) {
+      var entry = [];
+      for (var j = 0; j < valuesPerEntry; ++j) {
+        entry.push('$' + (i * valuesPerEntry + j + 1));
+      }
+      entries.push('(' + entry.join(',') + ')');
+    }
+    return entries.join(',');
   }
 }
 
