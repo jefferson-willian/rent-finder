@@ -76,7 +76,7 @@ initialize()
   .then(() => db.getSearches())
   .then(searchResults => {
     for (var i = 0; i < searchResults.length; ++i) {
-      searches_[searchResults.id] = searchResults.name;
+      searches_[searchResults[i].id] = searchResults[i].name;
     }
   })
   // Get every rent query that should be processed.
