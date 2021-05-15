@@ -36,7 +36,7 @@ class Database {
                              + ', $' + (i * 4 + 4) + ')').join(',');
 
     const values = entries.map(entry => [
-      getMd5(entry.href),
+      getMd5(entry.name),
       entry.href,
       entry.name,
       new Date().toISOString()
