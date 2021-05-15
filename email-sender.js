@@ -16,7 +16,7 @@ class EmailSender {
   getMessage_(results) {
     var html = ""
     results.forEach((result) => {
-      html = html + "<h2>" + result.queryName + "</h2><ul>";
+      html = html + "<h2>" + result.searchName + "</h2><ul>";
       result.newRents.map(rent => {
         html = html + "<li><a href='" + rent + "'>" + rent + "</a></li>";
       });
