@@ -46,8 +46,7 @@ class Database {
   }
 
   addQueries(entries) {
-    const query = 'INSERT INTO queries (id, href, search_id, creation_date) VALUES ' +
-      this.getValuesMap_(entries.length, /* valuesPerEntry */ 4);
+    const columns = ['id', 'href', 'search_id', 'creation_date'];
 
     const values = entries.map(entry => [
       getMd5(entry.href),
@@ -57,7 +56,7 @@ class Database {
     ]);
 
     return this.tryAddSearches_(entries.map(entry => entry.name))
-      .then(() => this.client_.query(query, [].concat.apply([], values)));
+      .then(() => this.insert_('queries', columns, values));
   }
 
   tryAddSearches_(searches) {
@@ -78,19 +77,29 @@ class Database {
       });
   }
 
+  /**
+   * Delete a set of queries identified by their unique IDs.
+   *
+   * @public
+   **/
   deleteQueries(ids) {
     return this.delete_('queries', 'id IN ' + this.createSqlSet_(ids))
       .then(() => this.clearSearches_());
   }
 
+  /**
+   * Clear searches that doesn't have any query associated with it.
+   *
+   * @private
+   **/
   clearSearches_() {
     return this.getQueries()
       .then(results => {
         const activeSearches = this.uniqueArray_(
           results.map(result => result.search_id));
 
-        return this.delete_('searches',
-          'id NOT IN ' + this.createSqlSet_(activeSearches));
+        return this.delete_('searches', activeSearches.length == 0
+          ? null : 'id NOT IN ' + this.createSqlSet_(activeSearches));
       });
   }
 
@@ -142,8 +151,19 @@ class Database {
       .then(res => res.rows);
   }
 
+  insert_(tableName, columns, entries) {
+    const query = 'INSERT INTO ' + tableName
+      + ' (' + columns.join(',') + ') VALUES '
+      + entries.map(entry => this.createSqlSet_(entry)).join(',');
+
+    return this.assertConnection_()
+      .then(() => this.client_.query(query));
+  }
+
   delete_(tableName, conditional) {
-    const query = 'DELETE FROM ' + tableName + ' WHERE ' + conditional;
+    const query = 'DELETE FROM ' + tableName
+      + (conditional ? ' WHERE ' + conditional : '');
+
     return this.assertConnection_()
       .then(() => this.client_.query(query));
   }
