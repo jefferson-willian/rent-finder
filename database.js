@@ -138,8 +138,13 @@ class Database {
       .query(query, [id, new Date().toISOString()])
   }
 
+  /**
+   * Close database connection.
+   *
+   * @public
+   */
   close() {
-    return this.client_.end();
+    return this.client_ == null ? Promise.reject() : this.client_.end();
   }
 
   select_(tableName, conditional = null) {
