@@ -49,12 +49,51 @@ describe('Connection', () => {
 
     return expect(db.close()).rejects.toEqual();
   });
-})
+});
+
+describe('Select', () => {
+  it('get searches', () => {
+    const result = ["result1", "result2"];
+    mockDatabase({
+      query: {
+        "select * from searches": { rows: result }
+      }
+    });
+
+    return expect(db.connect().then(() => db.getSearches()))
+        .resolves.toEqual(result);
+  });
+
+  it('get queries', () => {
+    const result = ["result1", "result2"];
+    mockDatabase({
+      query: {
+        "select * from queries": { rows: result }
+      }
+    });
+
+    return expect(db.connect().then(() => db.getQueries()))
+        .resolves.toEqual(result);
+  });
+
+  it('get rents', () => {
+    const result = ["result1", "result2"];
+    mockDatabase({
+      query: {
+        "select * from rents where query_id = '12345'": { rows: result }
+      }
+    });
+
+    return expect(db.connect().then(() => db.getRents('12345')))
+        .resolves.toEqual(result);
+  });
+});
 
 function mockDatabase(paramsOverride) {
   const params = {
     rejectConnection: getOrDefault(paramsOverride.rejectConnection, false),
     failOnClose: getOrDefault(paramsOverride.failOnClose, false),
+    query: getOrDefault(paramsOverride.query, {}),
   }
 
   Client.mockImplementation(() => {
@@ -64,6 +103,9 @@ function mockDatabase(paramsOverride) {
       }),
       end: jest.fn(() => {
         return params.failOnClose ? Promise.reject() : Promise.resolve();
+      }),
+      query: jest.fn(query => {
+        return params.query[query.toLowerCase()];
       }),
     };
   });

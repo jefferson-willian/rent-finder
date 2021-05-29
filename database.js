@@ -45,6 +45,15 @@ class Database {
     return this.select_('queries');
   }
 
+  /**
+   * Returns all rents for a given query.
+   *
+   * @public
+   */
+  getRents(queryId) {
+    return this.select_('rents', 'query_id = \'' + queryId + '\'');
+  }
+
   addQueries(entries) {
     const columns = ['id', 'href', 'search_id', 'creation_date'];
 
@@ -101,13 +110,6 @@ class Database {
         return this.delete_('searches', activeSearches.length == 0
           ? null : 'id NOT IN ' + this.createSqlSet_(activeSearches));
       });
-  }
-
-  getRents(identifier) {
-    const query = 'SELECT * FROM rents WHERE query_id = $1';
-    return this.client_
-      .query(query, [identifier])
-      .then(res => res.rows);
   }
 
   addNewRents(rents, queryId) {
